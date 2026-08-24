@@ -3,9 +3,12 @@ const WS_ORIGIN = (import.meta.env.VITE_WS_URL || "").replace(/\/$/, "");
 const BASE = `${API_ORIGIN}/api`;
 
 async function request(path, options = {}) {
+  const headers = options.body
+    ? { "Content-Type": "application/json", ...options.headers }
+    : options.headers;
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    ...(headers ? { headers } : {}),
   });
   if (!res.ok) {
     let detail = "Request failed.";

@@ -48,8 +48,9 @@ async def on_startup():
     ffmpeg = get_ffmpeg_status(settings_store.ffmpeg_path)
     import yt_dlp
     logger.info(
-        "StreamCarina backend started on %s; yt-dlp=%s, ffmpeg=%s, removed %d stale staging job(s).",
-        platform.system(), yt_dlp.version.__version__, ffmpeg.version or "unavailable", removed,
+        "StreamCarina backend started on %s; yt-dlp=%s, ffmpeg=%s, cors=%s, removed %d stale staging job(s).",
+        platform.system(), yt_dlp.version.__version__, ffmpeg.version or "unavailable",
+        settings_store.cors_origins, removed,
     )
 
 

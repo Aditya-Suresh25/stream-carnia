@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 from threading import Lock
+from urllib.parse import urlsplit, urlunsplit
 
 from dotenv import load_dotenv
 
@@ -62,7 +63,17 @@ class AppSettingsStore:
     @property
     def cors_origins(self) -> list[str]:
         raw = os.getenv("CORS_ORIGINS") or self.cors_origin
-        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+        origins = []
+        for value in raw.split(","):
+            value = value.strip().strip('"\'')
+            if not value:
+                continue
+            if "://" not in value:
+                scheme = "http" if value.startswith(("localhost", "127.0.0.1")) else "https"
+                value = f"{scheme}://{value}"
+            parsed = urlsplit(value)
+            origins.append(urlunsplit((parsed.scheme, parsed.netloc, "", "", "")))
+        return origins
 
 
 settings_store = AppSettingsStore()
