@@ -37,7 +37,7 @@ export default function QualitySelector({ formats, selectedKey, onSelect }) {
       </button>
 
       {open && (
-        <div className="absolute z-20 mt-2 w-full max-h-80 overflow-y-auto card p-1.5 animate-fadeIn">
+        <div className="relative z-20 mt-2 w-full max-h-80 overflow-y-auto card p-1.5 animate-fadeIn">
           {formats.map((f) => (
             <button
               key={f.key}

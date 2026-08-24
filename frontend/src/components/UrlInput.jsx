@@ -11,8 +11,9 @@ export default function UrlInput({ onAnalyze, isAnalyzing }) {
 
   return (
     <div className="card p-8 sm:p-10 text-center animate-fadeIn">
+      <p className="tool-eyebrow">The downloader</p>
       <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-50">
-        Download your videos in original quality
+        Bring the source home
       </h2>
       <p className="text-slate-500 mt-2 text-sm">
         Paste a YouTube link — video, livestream VOD, or short.

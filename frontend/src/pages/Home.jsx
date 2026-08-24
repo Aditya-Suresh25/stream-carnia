@@ -3,7 +3,6 @@ import Header from "../components/Header";
 import UrlInput from "../components/UrlInput";
 import VideoInfo from "../components/VideoInfo";
 import DownloadQueue from "../components/DownloadQueue";
-import Settings from "../components/Settings";
 import Toasts from "../components/Toasts";
 import { api } from "../services/api";
 
@@ -13,7 +12,6 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isQueuing, setIsQueuing] = useState(false);
   const [queue, setQueue] = useState([]);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
   const toastId = useRef(0);
 
@@ -71,9 +69,9 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <Header onOpenSettings={() => setSettingsOpen(true)} />
+    <div className="downloader-page min-h-screen">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <Header />
 
         <main className="pb-16 space-y-6">
           <UrlInput onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />
@@ -92,7 +90,6 @@ export default function Home() {
         </main>
       </div>
 
-      <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <Toasts toasts={toasts} />
     </div>
   );
