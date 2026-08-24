@@ -1,4 +1,6 @@
-const BASE = "/api";
+const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const WS_ORIGIN = (import.meta.env.VITE_WS_URL || "").replace(/\/$/, "");
+const BASE = `${API_ORIGIN}/api`;
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
@@ -35,6 +37,6 @@ export const api = {
 };
 
 export function downloadSocketUrl(downloadId) {
-  const proto = window.location.protocol === "https:" ? "wss" : "ws";
-  return `${proto}://${window.location.host}/ws/download/${downloadId}`;
+  const origin = WS_ORIGIN || `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`;
+  return `${origin}/ws/download/${downloadId}`;
 }

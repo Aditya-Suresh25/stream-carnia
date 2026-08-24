@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shutil
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -114,7 +115,7 @@ class DownloadManager:
             self._broadcast(download_id)
 
         try:
-            output_dir = staging_download_dir()
+            output_dir = staging_download_dir() / download_id
             Path(output_dir).mkdir(parents=True, exist_ok=True)
             ffmpeg_path = self._ffmpeg_path_provider()
 
@@ -134,6 +135,7 @@ class DownloadManager:
             )
 
             if active.cancel_requested:
+                shutil.rmtree(output_dir, ignore_errors=True)
                 item.stage = DownloadStage.CANCELLED
                 self._broadcast(download_id)
                 return
@@ -153,6 +155,7 @@ class DownloadManager:
                 file_path=item.file_path,
             ))
         except Exception as exc:  # noqa: BLE001
+            shutil.rmtree(staging_download_dir() / download_id, ignore_errors=True)
             logger.exception("Download %s failed", download_id)
             item.stage = DownloadStage.FAILED
             item.error = str(exc)

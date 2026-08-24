@@ -39,7 +39,9 @@ def health():
     ffmpeg = get_ffmpeg_status(settings_store.ffmpeg_path)
     import yt_dlp
     return {
-        "status": "ok",
+        "status": "ok" if ffmpeg.installed else "degraded",
+        "yt_dlp": True,
+        "ffmpeg": ffmpeg.installed,
         "ffmpeg_installed": ffmpeg.installed,
         "ffmpeg_version": ffmpeg.version,
         "ytdlp_version": yt_dlp.version.__version__,

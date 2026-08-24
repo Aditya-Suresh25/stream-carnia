@@ -19,6 +19,7 @@ backend/logs/*.log
 
 # Env
 .env
+frontend/.env
 
 # OS
 .DS_Store

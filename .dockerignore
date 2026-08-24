@@ -1,0 +1,10 @@
+.git
+.gitignore
+venv
+frontend/node_modules
+frontend/dist
+backend/logs
+backend/downloads/*.db
+backend/downloads/settings.json
+__pycache__
+*.pyc

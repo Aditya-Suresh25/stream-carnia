@@ -59,5 +59,10 @@ class AppSettingsStore:
     def cors_origin(self) -> str:
         return os.getenv("CORS_ORIGIN", "http://localhost:5173")
 
+    @property
+    def cors_origins(self) -> list[str]:
+        raw = os.getenv("CORS_ORIGINS") or self.cors_origin
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
 
 settings_store = AppSettingsStore()

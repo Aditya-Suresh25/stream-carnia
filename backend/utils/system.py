@@ -2,6 +2,7 @@
 import os
 import platform
 import shutil
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -15,7 +16,24 @@ def default_download_dir() -> Path:
 
 def staging_download_dir() -> Path:
     """Return the temporary directory used before the user saves a file."""
-    return Path(tempfile.gettempdir()) / "YouTube Downloader" / "staging"
+    return Path(os.getenv("STAGING_DIR") or (Path(tempfile.gettempdir()) / "StreamCarnia"))
+
+
+def cleanup_staging(max_age_hours: int = 24) -> int:
+    """Remove staged job directories older than the retention window."""
+    root = staging_download_dir()
+    if not root.exists():
+        return 0
+    cutoff = __import__("time").time() - max_age_hours * 3600
+    removed = 0
+    for job_dir in root.iterdir():
+        try:
+            if job_dir.is_dir() and job_dir.stat().st_mtime < cutoff:
+                shutil.rmtree(job_dir)
+                removed += 1
+        except OSError:
+            pass
+    return removed
 
 
 def find_ffmpeg(explicit_path: str | None = None) -> str | None:

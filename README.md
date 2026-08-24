@@ -1,4 +1,14 @@
-# YouTube Downloader
+# StreamCarnia
+
+StreamCarnia is a local-first video downloader for public or authorized
+YouTube videos and livestream VODs. It preserves the highest available source
+quality, including adaptive 1440p60 and 4K formats when offered.
+
+## Production architecture
+
+The Vite/React frontend can run on Vercel and the FastAPI backend can run on
+Render. Set the frontend's public API and WebSocket origins to the Render
+service; no secrets belong in `VITE_` variables.
 
 A local desktop utility for downloading YouTube videos and livestream VODs in
 their **original/highest available quality** (up to 4K60), built on top of
@@ -101,6 +111,71 @@ npm run dev
 Then open **http://localhost:5173** in your browser. The Vite dev server
 proxies `/api` and `/ws` to the backend on port 8000, so no extra CORS
 configuration is needed in development.
+
+## Environment variables
+
+Copy `frontend/.env.example` for local overrides:
+
+```env
+VITE_API_URL=http://localhost:8000
+VITE_WS_URL=ws://localhost:8000
+```
+
+For Vercel, set these to the Render service origins, for example
+`https://streamcarnia-api.onrender.com` and
+`wss://streamcarnia-api.onrender.com`. The frontend falls back to Vite's
+local `/api` and `/ws` proxy when they are blank.
+
+For the backend, set `CORS_ORIGINS` to a comma-separated list containing the
+Vercel URL and any local development URL. `STAGING_DIR` is optional and
+defaults to the operating system temporary directory. `PORT` is supplied by
+Render.
+
+## Routes
+
+| Route | View |
+|---|---|
+| `/` | StreamCarina landing page |
+| `/download` | Video downloader |
+| `/history` | Download history |
+| `/settings` | Settings |
+| `/*` | Themed not-found page |
+
+Vercel uses `frontend/vercel.json` to serve `index.html` for direct SPA route
+refreshes.
+
+## Render deployment
+
+Deploy the repository with the included `Dockerfile`. It installs Linux
+FFmpeg, installs `backend/requirements.txt`, and starts:
+
+```bash
+uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+```
+
+Set `CORS_ORIGINS=https://YOUR-APP.vercel.app` in Render. The backend's
+`backend/bin/ffmpeg.exe` is used only on Windows; Linux uses `ffmpeg` from
+PATH in the container. Render's filesystem is ephemeral, so completed files
+are staged under `/tmp/StreamCarnia` and retained only temporarily. Stale job
+directories older than 24 hours are removed on startup.
+
+## Production download flow
+
+The POST request creates an in-memory background job. yt-dlp downloads the
+selected video/audio streams, FFmpeg muxes them without re-encoding, and the
+browser retrieves the completed file through
+`GET /api/download/{download_id}/file`. Files are not permanent storage and
+may disappear when Render restarts or after staging cleanup.
+
+## Known hosting limitations
+
+Render's free or small instances can cold-start, run out of disk, throttle
+CPU/network, or restart during long VOD downloads. The queue and WebSocket
+state are in memory and are lost on a service restart. Large files consume
+Render disk and outbound bandwidth, and the browser must finish receiving a
+file before temporary cleanup can safely occur. For dependable long-running
+or multi-GB downloads, use a persistent worker and object storage rather than
+the current personal-use deployment.
 
 ---
 
