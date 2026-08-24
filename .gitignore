@@ -20,6 +20,8 @@ backend/logs/*.log
 # Env
 .env
 frontend/.env
+*youtube-cookies*.txt
+*cookies*.txt
 
 # OS
 .DS_Store

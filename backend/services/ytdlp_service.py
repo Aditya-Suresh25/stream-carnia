@@ -43,7 +43,7 @@ def validate_youtube_url(url: str) -> str:
     return url
 
 
-def _base_ydl_opts(ffmpeg_path: str | None) -> dict[str, Any]:
+def _base_ydl_opts(ffmpeg_path: str | None, cookies_path: str | None = None) -> dict[str, Any]:
     opts: dict[str, Any] = {
         "quiet": True,
         "no_warnings": True,
@@ -55,6 +55,8 @@ def _base_ydl_opts(ffmpeg_path: str | None) -> dict[str, Any]:
     }
     if ffmpeg_path:
         opts["ffmpeg_location"] = ffmpeg_path
+    if cookies_path:
+        opts["cookiefile"] = cookies_path
     return opts
 
 
@@ -202,9 +204,13 @@ def build_format_options(info: dict[str, Any]) -> list[FormatOption]:
     return options
 
 
-def analyze_url(url: str, ffmpeg_path: str | None = None) -> AnalyzeResponse:
+def analyze_url(
+    url: str,
+    ffmpeg_path: str | None = None,
+    cookies_path: str | None = None,
+) -> AnalyzeResponse:
     url = validate_youtube_url(url)
-    opts = _base_ydl_opts(ffmpeg_path)
+    opts = _base_ydl_opts(ffmpeg_path, cookies_path)
 
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -252,6 +258,7 @@ def download_video(
     output_dir: str,
     container: str,
     ffmpeg_path: str | None,
+    cookies_path: str | None,
     on_progress: ProgressCallback,
 ) -> dict[str, Any]:
     """
@@ -319,7 +326,7 @@ def download_video(
                 on_progress({"stage": DownloadStage.FINALIZING, "percent": 99.5})
 
     opts: dict[str, Any] = {
-        **_base_ydl_opts(ffmpeg_path),
+        **_base_ydl_opts(ffmpeg_path, cookies_path),
         "format": format_selector,
         "outtmpl": {"default": f"{output_dir}/%(_custom_base)s.%(ext)s"},
         "progress_hooks": [hook],

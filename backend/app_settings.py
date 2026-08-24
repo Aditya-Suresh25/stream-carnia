@@ -53,6 +53,14 @@ class AppSettingsStore:
         return find_ffmpeg(os.getenv("FFMPEG_PATH") or None)
 
     @property
+    def youtube_cookies_path(self) -> str | None:
+        value = os.getenv("YOUTUBE_COOKIES_FILE")
+        if not value:
+            return None
+        path = Path(value).expanduser()
+        return str(path) if path.is_file() else None
+
+    @property
     def db_path(self) -> str:
         return os.getenv("DB_PATH", str(Path(__file__).resolve().parent / "downloads" / "history.db"))
 

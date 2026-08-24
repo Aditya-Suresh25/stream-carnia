@@ -28,6 +28,7 @@ history_store = HistoryStore(settings_store.db_path)
 download_manager = DownloadManager(
     download_dir_provider=lambda: settings_store.get().download_dir,
     ffmpeg_path_provider=lambda: settings_store.ffmpeg_path,
+    cookies_path_provider=lambda: settings_store.youtube_cookies_path,
     container_provider=lambda: settings_store.get().container.value,
     history_store=history_store,
     max_workers=max(1, settings_store.get().concurrent_downloads),
@@ -42,6 +43,7 @@ def health():
         "status": "ok" if ffmpeg.installed else "degraded",
         "yt_dlp": True,
         "ffmpeg": ffmpeg.installed,
+        "youtube_cookies": settings_store.youtube_cookies_path is not None,
         "ffmpeg_installed": ffmpeg.installed,
         "ffmpeg_version": ffmpeg.version,
         "ytdlp_version": yt_dlp.version.__version__,
@@ -51,7 +53,11 @@ def health():
 @router.post("/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest):
     try:
-        return ytdlp_service.analyze_url(payload.url, ffmpeg_path=settings_store.ffmpeg_path)
+        return ytdlp_service.analyze_url(
+            payload.url,
+            ffmpeg_path=settings_store.ffmpeg_path,
+            cookies_path=settings_store.youtube_cookies_path,
+        )
     except ytdlp_service.UnsupportedURLError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:

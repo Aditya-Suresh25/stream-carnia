@@ -131,6 +131,27 @@ Vercel URL and any local development URL. `STAGING_DIR` is optional and
 defaults to the operating system temporary directory. `PORT` is supplied by
 Render.
 
+## Authenticated YouTube videos
+
+Some videos require an authenticated YouTube session. To enable authorized
+access, export a Netscape-format cookies file from a browser account that has
+permission to view the content, then configure the backend-only
+`YOUTUBE_COOKIES_FILE` variable to its path. Never commit this file, put it in
+the frontend, send it through the API, or paste its contents into logs.
+
+For Render, add the file as a Secret File named
+`/etc/secrets/youtube-cookies.txt` and set:
+
+```env
+YOUTUBE_COOKIES_FILE=/etc/secrets/youtube-cookies.txt
+```
+
+Redeploy after adding or rotating the secret. The health response reports only
+whether a readable cookie file is configured. Cookies expire and should be
+rotated; use an account dedicated to this service and revoke it if exposed.
+This does not bypass DRM or access controls and does not guarantee access to
+content the account is not authorized to view.
+
 ## Routes
 
 | Route | View |

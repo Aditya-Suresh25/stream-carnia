@@ -40,12 +40,14 @@ class DownloadManager:
         self,
         download_dir_provider,
         ffmpeg_path_provider,
+        cookies_path_provider,
         container_provider,
         history_store: HistoryStore,
         max_workers: int = 1,
     ):
         self._download_dir_provider = download_dir_provider
         self._ffmpeg_path_provider = ffmpeg_path_provider
+        self._cookies_path_provider = cookies_path_provider
         self._container_provider = container_provider
         self._history = history_store
         self._items: dict[str, _ActiveDownload] = {}
@@ -118,6 +120,7 @@ class DownloadManager:
             output_dir = staging_download_dir() / download_id
             Path(output_dir).mkdir(parents=True, exist_ok=True)
             ffmpeg_path = self._ffmpeg_path_provider()
+            cookies_path = self._cookies_path_provider()
 
             item.stage = DownloadStage.DOWNLOADING_VIDEO
             self._broadcast(download_id)
@@ -131,6 +134,7 @@ class DownloadManager:
                 output_dir=str(output_dir),
                 container=active.container,
                 ffmpeg_path=ffmpeg_path,
+                cookies_path=cookies_path,
                 on_progress=on_progress,
             )
 
