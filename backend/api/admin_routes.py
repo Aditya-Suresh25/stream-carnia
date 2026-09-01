@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import io
 import os
 import shutil
 from datetime import datetime, timedelta
@@ -10,26 +9,22 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Header, Depends, UploadFile, File
-from fastapi.responses import StreamingResponse
-from appwrite.exception import AppwriteException
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
 
 from backend.app_settings import settings_store
 from backend.services.analytics_store import AnalyticsStore
 from backend.services.appwrite_service import appwrite_service
+from backend.services.github_release_service import GitHubReleaseError, github_release_service
 
 logger = logging.getLogger("api.admin")
 
 router = APIRouter(prefix="/admin")
 
 
-def _appwrite_unavailable(exc: AppwriteException) -> HTTPException:
-    logger.error("Appwrite request failed: %s", exc)
-    return HTTPException(
-        status_code=503,
-        detail="Appwrite is not configured with the required API-key permissions. "
-        "Enable documents.read/documents.write and files.read/files.write, then redeploy.",
-    )
+def _github_unavailable(exc: GitHubReleaseError) -> HTTPException:
+    logger.error("GitHub Releases request failed: %s", exc)
+    return HTTPException(status_code=503, detail="GitHub Releases is unavailable. Check GITHUB_OWNER, GITHUB_REPOSITORY, and GITHUB_TOKEN.")
 
 # Initialize analytics store
 analytics_store = AnalyticsStore(
@@ -200,19 +195,15 @@ def track_download(event: DownloadEventRequest):
 @router.get("/releases/{version}/download")
 def download_release(version: str):
     """Download a specific release version (public endpoint)."""
-    if appwrite_service.enabled:
-        result = appwrite_service.get_download(version)
-        if not result:
-            raise HTTPException(status_code=404, detail="Published release not found")
-        content, filename = result
-        return StreamingResponse(
-            io.BytesIO(content),
-            media_type="application/zip",
-            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-        )
+    if github_release_service.enabled:
+        try:
+            release = github_release_service.find_version(version)
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
+        if not release or not release["download_url"]:
+            raise HTTPException(status_code=404, detail="Published release asset not found")
+        return RedirectResponse(release["download_url"], status_code=307)
 
-    from fastapi.responses import FileResponse
-    
     file_info = analytics_store.get_release_file_info(version)
     
     if not file_info or not file_info.get("file_path"):
@@ -274,11 +265,11 @@ def logout(user: dict = Depends(_require_admin)):
 @router.get("/versions")
 def get_all_versions() -> list[VersionResponse]:
     """Get all versions (public endpoint)."""
-    if appwrite_service.enabled:
+    if github_release_service.enabled:
         try:
-            return [VersionResponse(**version) for version in appwrite_service.list_versions()]
-        except AppwriteException as exc:
-            raise _appwrite_unavailable(exc) from exc
+            return [VersionResponse(**version) for version in github_release_service.list_versions()]
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
 
     versions = analytics_store.get_all_versions_with_files()
     return [
@@ -303,11 +294,11 @@ def get_all_versions() -> list[VersionResponse]:
 @router.get("/versions/latest")
 def get_latest_version() -> VersionResponse | None:
     """Get the latest published/latest version for public download pages."""
-    if appwrite_service.enabled:
+    if github_release_service.enabled:
         try:
-            versions = appwrite_service.list_versions()
-        except AppwriteException as exc:
-            raise _appwrite_unavailable(exc) from exc
+            versions = github_release_service.list_versions()
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
         if not versions:
             raise HTTPException(status_code=404, detail="No versions found")
         selected = next((item for item in versions if item["is_latest"] or item["is_published"]), versions[0])
@@ -352,11 +343,13 @@ def create_version(
     user: dict = Depends(_require_admin),
 ) -> VersionResponse:
     """Create a new version (admin only)."""
-    if appwrite_service.enabled:
+    if github_release_service.enabled:
         try:
-            return VersionResponse(**appwrite_service.create_version(version_data.model_dump()))
+            return VersionResponse(**github_release_service.create_version(version_data.model_dump()))
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
 
     success = analytics_store.create_version(
         version=version_data.version,
@@ -394,8 +387,11 @@ def update_version(
     user: dict = Depends(_require_admin),
 ) -> VersionResponse:
     """Update a version (admin only)."""
-    if appwrite_service.enabled:
-        updated = appwrite_service.update_version(version, version_data.model_dump())
+    if github_release_service.enabled:
+        try:
+            updated = github_release_service.update_version(version, version_data.model_dump())
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
         if not updated:
             raise HTTPException(status_code=404, detail="Version not found")
         return VersionResponse(**updated)
@@ -440,14 +436,16 @@ async def upload_release_file(
     user: dict = Depends(_require_admin),
 ) -> FileUploadResponse:
     """Upload a release ZIP file (admin only)."""
-    if appwrite_service.enabled:
+    if github_release_service.enabled:
         try:
-            result = appwrite_service.upload_release(version, file.filename or "release.zip", await file.read())
+            result = github_release_service.upload_release(version, file.filename or "release.zip", await file.read())
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
         except Exception as exc:
-            logger.exception("Failed to upload release to Appwrite")
-            raise HTTPException(status_code=500, detail="Failed to upload file to Appwrite") from exc
+            logger.exception("Failed to upload release to GitHub")
+            raise HTTPException(status_code=500, detail="Failed to upload file to GitHub Releases") from exc
         return FileUploadResponse(success=True, message="File uploaded successfully", **result)
 
     # Validate file type
@@ -500,8 +498,12 @@ def publish_release(
     user: dict = Depends(_require_admin),
 ) -> dict:
     """Publish a release (make it available for download) (admin only)."""
-    if appwrite_service.enabled:
-        if not appwrite_service.publish(version, True):
+    if github_release_service.enabled:
+        try:
+            published = github_release_service.publish(version, True)
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
+        if not published:
             raise HTTPException(status_code=404, detail="Version not found")
         return {"success": True, "message": f"Version {version} published successfully"}
 
@@ -527,8 +529,12 @@ def unpublish_release(
     user: dict = Depends(_require_admin),
 ) -> dict:
     """Unpublish a release (admin only)."""
-    if appwrite_service.enabled:
-        if not appwrite_service.publish(version, False):
+    if github_release_service.enabled:
+        try:
+            unpublished = github_release_service.publish(version, False)
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
+        if not unpublished:
             raise HTTPException(status_code=404, detail="Version not found")
         return {"success": True, "message": f"Version {version} unpublished successfully"}
 
@@ -549,8 +555,12 @@ def delete_release(
     user: dict = Depends(_require_admin),
 ) -> dict:
     """Delete a release and its associated files (admin only)."""
-    if appwrite_service.enabled:
-        if not appwrite_service.delete_version(version):
+    if github_release_service.enabled:
+        try:
+            deleted = github_release_service.delete_version(version)
+        except GitHubReleaseError as exc:
+            raise _github_unavailable(exc) from exc
+        if not deleted:
             raise HTTPException(status_code=404, detail="Version not found")
         return {"success": True, "message": f"Version {version} deleted successfully"}
 

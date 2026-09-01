@@ -15,11 +15,12 @@ services:
         value: https://cloud.appwrite.io/v1
       - key: APPWRITE_PROJECT_ID
         sync: false
-      - key: APPWRITE_API_KEY
+      - key: GITHUB_OWNER
         sync: false
-      - key: APPWRITE_DATABASE_ID
+      - key: GITHUB_REPOSITORY
         sync: false
-      - key: APPWRITE_RELEASES_COLLECTION_ID
+      - key: GITHUB_TOKEN
         sync: false
-      - key: APPWRITE_BUCKET_ID
+      - key: GITHUB_TARGET_BRANCH
+        value: main
         sync: false

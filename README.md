@@ -155,32 +155,29 @@ directories older than 24 hours are removed on startup.
 
 ### Appwrite setup
 
-Appwrite is used for persistent admin authentication, release metadata, and
-ZIP storage when all `APPWRITE_*` variables are configured. In Appwrite:
+Appwrite is used only for admin authentication. GitHub Releases is the
+persistent source for release metadata and ZIP assets.
+
+In Appwrite:
 
 1. Create a project and an admin user with an email/password account.
-2. Create a database and a `releases` collection. Add these attributes:
-  `version` (required string), `release_date` (required string), `status`
-  (required string), `download_url` (string), `file_size` (integer),
-  `changelog` (string), `is_latest` (boolean), `is_published` (boolean),
-  `download_count` (integer), `file_id` (string), `file_name` (string), and
-  `uploaded_at` (string).
-3. Create a private storage bucket for ZIP files. Create a server API key with
-  these scopes: `databases.read`, `databases.write`, `documents.read`,
-  `documents.write`, `files.read`, and `files.write`. In some Appwrite Console
-  views the document read permission is displayed as
-  `documentsdb.documents.read`; enable that permission for the API key's
-  database scope, not only as a collection permission. The missing
-  `documents.read` scope produces a 401 from Appwrite. Do not expose this key
-  to Vercel.
-4. Add the Appwrite endpoint, project, API key, database, collection, and
-  bucket IDs to Render using the names in `backend/.env.example`.
-5. Redeploy Render, then log in at `/admin/login` using the Appwrite account
-  email and password. Create a release, upload its ZIP, and publish it.
+2. Create an email/password account for the administrator.
+3. Add `APPWRITE_ENDPOINT` and `APPWRITE_PROJECT_ID` to Render. No Appwrite
+  API key, database, or storage permissions are needed.
 
-When Appwrite variables are absent, local development falls back to the
-existing SQLite/local-file implementation. This fallback is useful locally;
-configure Appwrite in Render for persistent production releases.
+In GitHub:
+
+1. Create a repository for the Windows application releases.
+2. Create a fine-grained token with **Contents: Read and write** access to that
+  repository. Add `GITHUB_OWNER`, `GITHUB_REPOSITORY`, and `GITHUB_TOKEN` to
+  Render. Never expose the token to Vercel.
+3. Redeploy Render, then log in at `/admin/login` with the Appwrite account
+  email and password. Creating a release makes a GitHub draft release;
+  uploading the ZIP and publishing it makes it available to users.
+
+When GitHub variables are absent, local development falls back to the existing
+SQLite/local-file release implementation. Configure both Appwrite and GitHub
+in Render for production.
 
 ### Vercel + Render checklist
 
@@ -197,10 +194,9 @@ configure Appwrite in Render for persistent production releases.
 
 ## Release download flow
 
-The public download page retrieves the latest release metadata from the API and
-streams the published installer through the release endpoint. With Appwrite
-configured, release metadata is stored in the Appwrite database and ZIP files
-are stored in the Appwrite bucket, so they survive Render restarts.
+The public download page retrieves release metadata from GitHub through the API.
+The API redirects users to GitHub's published ZIP asset, so the installer is
+served by GitHub and survives Render restarts.
 
 ## Known hosting limitations
 

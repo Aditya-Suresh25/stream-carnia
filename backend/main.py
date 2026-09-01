@@ -14,6 +14,7 @@ from backend.api.admin_routes import router as admin_router
 from backend.app_settings import settings_store
 from backend.services.ffmpeg_service import get_ffmpeg_status
 from backend.services.appwrite_service import appwrite_service
+from backend.services.github_release_service import github_release_service
 from backend.utils.system import cleanup_staging
 
 LOG_DIR = Path(__file__).resolve().parent / "logs"
@@ -56,6 +57,7 @@ async def on_startup():
         bool(settings_store.youtube_cookies_path), settings_store.cors_origins, removed,
     )
     logger.info("Appwrite release/auth integration enabled=%s", appwrite_service.enabled)
+    logger.info("GitHub Releases integration enabled=%s", github_release_service.enabled)
 
 
 @app.websocket("/ws/download/{download_id}")
