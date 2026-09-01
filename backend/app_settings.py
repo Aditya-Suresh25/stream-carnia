@@ -12,7 +12,10 @@ from dotenv import load_dotenv
 from backend.models.schemas import ContainerPreference, SettingsModel
 from backend.utils.system import default_download_dir, find_ffmpeg
 
-load_dotenv()
+# interpolate=False: bcrypt hashes and secrets contain `$` which dotenv would
+# otherwise treat as variable expansion. Always load backend/.env by path so
+# cwd (repo root vs backend/) does not change which file is read.
+load_dotenv(Path(__file__).resolve().parent / ".env", interpolate=False, encoding="utf-8-sig")
 
 _SETTINGS_FILE = Path(__file__).resolve().parent / "downloads" / "settings.json"
 
