@@ -15,6 +15,8 @@ services:
         value: https://cloud.appwrite.io/v1
       - key: APPWRITE_PROJECT_ID
         sync: false
+      - key: APPWRITE_API_KEY
+        sync: false
       - key: GITHUB_OWNER
         sync: false
       - key: GITHUB_REPOSITORY

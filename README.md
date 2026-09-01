@@ -162,8 +162,10 @@ In Appwrite:
 
 1. Create a project and an admin user with an email/password account.
 2. Create an email/password account for the administrator.
-3. Add `APPWRITE_ENDPOINT` and `APPWRITE_PROJECT_ID` to Render. No Appwrite
-  API key, database, or storage permissions are needed.
+3. Create a server API key with only the `sessions.write` scope, then add
+  `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, and `APPWRITE_API_KEY` to Render.
+  No Appwrite database or storage permissions are needed. Appwrite includes the
+  session secret in the login response only when the request uses an API key.
 
 In GitHub:
 
