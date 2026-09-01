@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBoxOpen, faCalendarDays, faChartBar, faDownload, faHardDrive, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 
 function formatFileSize(bytes) {
   if (!bytes) return "—";
@@ -213,21 +215,21 @@ export default function AdminDashboard() {
         </div>
         <nav className="admin-nav">
           {[
-            { id: "overview", label: "Overview", icon: "📊" },
-            { id: "releases", label: "Releases", icon: "📦" },
+            { id: "overview", label: "Overview", icon: faChartBar },
+            { id: "releases", label: "Releases", icon: faBoxOpen },
           ].map((item) => (
             <button 
               key={item.id} 
               onClick={() => setTab(item.id)} 
               className={`admin-nav-item ${tab === item.id ? "active" : ""}`}
             >
-              <span className="admin-nav-icon">{item.icon}</span>
+              <span className="admin-nav-icon"><FontAwesomeIcon icon={item.icon} aria-hidden="true" /></span>
               <span className="admin-nav-label">{item.label}</span>
             </button>
           ))}
         </nav>
         <div className="admin-sidebar-footer">
-          <button onClick={handleLogout} className="admin-logout-btn">🚪 Logout</button>
+          <button onClick={handleLogout} className="admin-logout-btn"><FontAwesomeIcon icon={faRightFromBracket} aria-hidden="true" /> Logout</button>
         </div>
       </aside>
 
@@ -445,9 +447,9 @@ export default function AdminDashboard() {
                                 </div>
                               </div>
                               <div className="admin-release-meta">
-                                <span>📅 {new Date(version.release_date).toLocaleDateString()}</span>
-                                <span>💾 {formatFileSize(version.file_size)}</span>
-                                <span>⬇️ {version.download_count} downloads</span>
+                                <span><FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" /> {new Date(version.release_date).toLocaleDateString()}</span>
+                                <span><FontAwesomeIcon icon={faHardDrive} aria-hidden="true" /> {formatFileSize(version.file_size)}</span>
+                                <span><FontAwesomeIcon icon={faDownload} aria-hidden="true" /> {version.download_count} downloads</span>
                               </div>
                             </div>
                             <div className="admin-release-actions">

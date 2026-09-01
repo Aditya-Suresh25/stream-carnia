@@ -1,8 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-base-950: #0a0b0f;
+  --color-base-900: #111319;
+  --color-base-850: #161821;
+  --color-base-800: #1c1f2a;
+  --color-base-700: #272b3a;
+  --color-base-600: #383d52;
+  --color-accent-400: #8b93ff;
+  --color-accent-500: #6c73f0;
+  --color-accent-600: #565dd6;
+  --font-sans: "DM Sans", ui-sans-serif, sans-serif;
+  --shadow-glow: 0 0 0 1px rgba(255,255,255,0.05), 0 8px 30px rgba(0,0,0,0.4);
+  --animate-fadeIn: fadeIn 0.25s ease-out;
+  --animate-pulseSoft: pulseSoft 1.6s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
 
 @layer base {
   html { color-scheme: dark; }

@@ -1,8 +1,8 @@
 # StreamCarnia
 
-StreamCarnia is a local-first video downloader for public or authorized
-YouTube videos and livestream VODs. It preserves the highest available source
-quality, including adaptive 1440p60 and 4K formats when offered.
+StreamCarnia is the official software distribution site for the StreamCarnia
+Windows application. It presents the product, publishes the latest installer,
+and keeps a browsable history of releases.
 
 ## Production architecture
 
@@ -10,34 +10,17 @@ The Vite/React frontend can run on Vercel and the FastAPI backend can run on
 Render. Set the frontend's public API and WebSocket origins to the Render
 service; no secrets belong in `VITE_` variables.
 
-A local desktop utility for downloading YouTube videos and livestream VODs in
-their **original/highest available quality** (up to 4K60), built on top of
-[yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg. React + Vite frontend,
-Python + FastAPI backend.
-
-> **Legal note:** Only download content you own or have permission to
-> download, and comply with YouTube's Terms of Service and applicable law.
-> This tool does not bypass DRM or any access controls — it only downloads
-> what yt-dlp can already retrieve for a public/authorized video.
+React + Vite frontend with a Python + FastAPI release and analytics backend.
 
 ---
 
 ## Features
 
-- Paste a YouTube URL → analyze → pick a quality → download, with real
-  progress (speed, ETA, downloaded/total size) over a WebSocket.
-- Quality list is built from the video's **actual available formats**, not a
-  hardcoded list — including 1440p60, 2160p60/4K60, and HDR when present.
-- Video-only + audio-only adaptive streams are combined automatically via
-  FFmpeg; a "Best Quality" option defers to yt-dlp's own best-stream logic.
-- Supports regular videos, livestream VODs, and long recordings.
-- Download queue with cancel / retry / remove, and a small download history.
-- Clean, sanitized filenames: `Channel Name - Video Title [1440p60].mp4`,
-  safe for Windows.
-- Settings for download folder, default quality, container preference
-  (Auto/MP4/MKV/WebM), and concurrent downloads.
-- Friendly error messages — no raw Python tracebacks in the UI (full details
-  go to `backend/logs/app.log`).
+- A polished landing page for the Windows product.
+- Latest-release download with download tracking.
+- Complete version history with release notes, file sizes, and download counts.
+- Responsive navigation with a mobile hamburger menu.
+- Admin dashboard for publishing releases and viewing site analytics.
 
 ## Screenshots
 
@@ -119,20 +102,11 @@ Copy `frontend/.env.example` for local overrides:
 ```env
 VITE_API_URL=http://localhost:8000
 VITE_WS_URL=ws://localhost:8000
-```
-
-For Vercel, set these to the Render service origins, for example
-`https://streamcarnia-api.onrender.com` and
-`wss://streamcarnia-api.onrender.com`. The frontend falls back to Vite's
-local `/api` and `/ws` proxy when they are blank.
-
-For the backend, set `CORS_ORIGINS` to a comma-separated list containing the
-Vercel URL and any local development URL. `STAGING_DIR` is optional and
-defaults to the operating system temporary directory. `PORT` is supplied by
-Render.
-
-## Authenticated YouTube videos
-
+- A polished landing page for the Windows product.
+- Latest-release download with download tracking.
+- Complete version history with release notes, file sizes, and download counts.
+- Responsive navigation with a mobile hamburger menu.
+- Admin dashboard for publishing releases and viewing site analytics.
 Some videos require an authenticated YouTube session. To enable authorized
 access, export a Netscape-format cookies file from a browser account that has
 permission to view the content, then configure the backend-only
@@ -157,9 +131,8 @@ content the account is not authorized to view.
 | Route | View |
 |---|---|
 | `/` | StreamCarina landing page |
-| `/download` | Video downloader |
-| `/history` | Download history |
-| `/settings` | Settings |
+| `/download` | StreamCarnia software download |
+| `/versions` | Version history and releases |
 | `/*` | Themed not-found page |
 
 Vercel uses `frontend/vercel.json` to serve `index.html` for direct SPA route
@@ -180,23 +153,31 @@ PATH in the container. Render's filesystem is ephemeral, so completed files
 are staged under `/tmp/StreamCarnia` and retained only temporarily. Stale job
 directories older than 24 hours are removed on startup.
 
-## Production download flow
+### Vercel + Render checklist
 
-The POST request creates an in-memory background job. yt-dlp downloads the
-selected video/audio streams, FFmpeg muxes them without re-encoding, and the
-browser retrieves the completed file through
-`GET /api/download/{download_id}/file`. Files are not permanent storage and
-may disappear when Render restarts or after staging cleanup.
+1. Create a Render Web Service from this repository using the included
+  `render.yaml`, or choose Docker with the repository root as its context.
+2. Create a Vercel project from the same repository and set its **Root
+  Directory** to `frontend`. The included `frontend/vercel.json` handles SPA
+  route refreshes.
+3. In Vercel, set `VITE_API_URL` to the Render HTTPS origin and `VITE_WS_URL`
+  to its `wss://` origin. Set `VITE_DOWNLOAD_URL` to a public Windows release
+  URL when releases are hosted outside the API.
+4. In Render, set `CORS_ORIGINS` to the exact Vercel origin, optionally adding
+  a local development origin, then redeploy the service.
+
+## Release download flow
+
+The public download page retrieves the latest release metadata from the API and
+streams the published installer through the release endpoint. Release files
+are staged on Render's ephemeral filesystem, so durable hosting such as GitHub
+Releases or object storage is recommended for production distribution.
 
 ## Known hosting limitations
 
-Render's free or small instances can cold-start, run out of disk, throttle
-CPU/network, or restart during long VOD downloads. The queue and WebSocket
-state are in memory and are lost on a service restart. Large files consume
-Render disk and outbound bandwidth, and the browser must finish receiving a
-file before temporary cleanup can safely occur. For dependable long-running
-or multi-GB downloads, use a persistent worker and object storage rather than
-the current personal-use deployment.
+Render's filesystem is ephemeral. For dependable software distribution, host
+installer files in GitHub Releases or object storage and use the API to track
+downloads and publish metadata.
 
 ---
 
@@ -231,7 +212,7 @@ frontend/
 │   ├── services/api.js       # REST client + WS URL helper
 │   ├── hooks/useDownloadProgress.js
 │   ├── App.jsx / main.jsx
-├── tailwind.config.js
+├── postcss.config.js
 ├── vite.config.js
 └── package.json
 ```

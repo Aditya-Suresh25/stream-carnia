@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: streamcarnia-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: CORS_ORIGINS
+        sync: false
+      - key: YOUTUBE_COOKIES_FILE
+        sync: false
+      - key: STAGING_DIR
+        value: /tmp/StreamCarnia

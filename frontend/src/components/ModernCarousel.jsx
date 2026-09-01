@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 export function ModernCarousel({ children, autoPlay = true, interval = 4000, showDots = true }) {
   const [current, setCurrent] = useState(0);
@@ -38,10 +40,10 @@ export function ModernCarousel({ children, autoPlay = true, interval = 4000, sho
       {count > 1 && (
         <>
           <button className="carousel-nav carousel-prev" onClick={prev} aria-label="Previous">
-            ←
+            <FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" />
           </button>
           <button className="carousel-nav carousel-next" onClick={next} aria-label="Next">
-            →
+            <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
           </button>
 
           {showDots && (

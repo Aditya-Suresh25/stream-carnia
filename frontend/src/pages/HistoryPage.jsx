@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { api } from "../services/api";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 
 export default function HistoryPage() {
   const [entries, setEntries] = useState([]);
@@ -27,7 +29,7 @@ export default function HistoryPage() {
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-50">Download history</h2>
               <p className="text-sm text-slate-500 mt-2">A record of files processed on this machine.</p>
             </div>
-            <Link className="btn-primary" to="/download">New download <span aria-hidden="true">↗</span></Link>
+            <Link className="btn-primary" to="/download">New download <FontAwesomeIcon icon={faArrowUpRightFromSquare} aria-hidden="true" /></Link>
           </div>
 
           {loading ? <p className="text-sm text-slate-500">Loading history...</p> : entries.length ? (

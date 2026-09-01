@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGear, faStar } from "@fortawesome/free-solid-svg-icons";
 
 export function ModernCard({ children, className = "", delay = 0, hover3d = true }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -50,7 +52,7 @@ export function AnimatedButton({ children, onClick, variant = "primary", loading
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             style={{ display: "inline-block" }}
           >
-            ⚙️
+            <FontAwesomeIcon icon={faGear} aria-hidden="true" />
           </motion.div>
         ) : (
           children
@@ -61,7 +63,7 @@ export function AnimatedButton({ children, onClick, variant = "primary", loading
   );
 }
 
-export function FeatureCard({ number, title, description, icon = "✨", delay = 0 }) {
+export function FeatureCard({ number, title, description, icon = faStar, delay = 0 }) {
   return (
     <ModernCard delay={delay}>
       <motion.div
@@ -75,7 +77,7 @@ export function FeatureCard({ number, title, description, icon = "✨", delay = 
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         >
-          {icon}
+          <FontAwesomeIcon icon={icon} aria-hidden="true" />
         </motion.div>
         <div className="feature-number">{number}</div>
         <h3 className="feature-title">{title}</h3>

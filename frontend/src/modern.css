@@ -106,6 +106,48 @@ main {
 }
 
 /* ========== NAVIGATION ========== */
+.global-header {
+  width: min(100% - 8vw, 1180px);
+  margin: 0 auto;
+}
+
+.landing-page > .global-header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 100;
+  width: 100%;
+  max-width: none;
+  padding: 1.2rem 6vw;
+  transform: translateX(-50%);
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(0px);
+}
+
+.global-header .menu-toggle {
+  display: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.global-header .hamburger,
+.global-header .hamburger::before,
+.global-header .hamburger::after {
+  display: block;
+  width: 1.35rem;
+  height: 2px;
+  background: var(--gold);
+  transition: transform var(--transition-fast);
+}
+
+.global-header .hamburger { position: relative; }
+.global-header .hamburger::before,
+.global-header .hamburger::after { content: ""; position: absolute; left: 0; }
+.global-header .hamburger::before { top: -6px; }
+.global-header .hamburger::after { top: 6px; }
+.global-header .nav-links a.active { color: var(--gold); }
+
 .landing-nav {
   position: fixed;
   top: 0;
@@ -445,15 +487,80 @@ main {
   box-shadow: inset 0 0 30px rgba(215, 170, 88, 0.05);
 }
 
-/* ========== ANIMATED ORB ========== */
+/* ========== 3D FAVICON HERO OBJECT ========== */
 .animated-orb-container {
   width: 100%;
   max-width: 500px;
   aspect-ratio: 1;
   margin: 0 auto;
   position: relative;
+  display: grid;
+  place-items: center;
+  perspective: 1100px;
+  isolation: isolate;
+  cursor: grab;
+}
+
+.animated-orb-container:active {
+  cursor: grabbing;
+}
+
+.favicon-3d-object {
+  position: relative;
+  z-index: 2;
+  width: min(78%, 390px);
+  aspect-ratio: 1;
+  transform-style: preserve-3d;
   will-change: transform;
-  filter: drop-shadow(0 20px 60px rgba(215, 170, 88, 0.15));
+  filter: drop-shadow(0 28px 32px rgba(0, 0, 0, 0.38));
+}
+
+.favicon-3d-image,
+.favicon-3d-depth {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.favicon-3d-image {
+  z-index: 2;
+  transform: translateZ(22px);
+  filter: drop-shadow(0 0 26px rgba(42, 143, 255, 0.24));
+}
+
+.favicon-3d-depth {
+  z-index: 1;
+  transform: translateZ(-6px) translate(8px, 12px);
+  opacity: 0.7;
+  filter: brightness(0.28) saturate(1.4) blur(1px);
+}
+
+.favicon-3d-glint {
+  position: absolute;
+  z-index: 3;
+  inset: 8% 12% 55% 17%;
+  border-radius: 50%;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.35), transparent 42%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transform: translateZ(30px) rotate(-18deg);
+}
+
+.favicon-3d-shadow {
+  position: absolute;
+  z-index: 1;
+  bottom: 8%;
+  left: 50%;
+  width: 52%;
+  height: 10%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  filter: blur(18px);
+  transform: translateX(-50%);
+  animation: faviconShadow 5s ease-in-out infinite;
 }
 
 .animated-orb {
@@ -814,6 +921,27 @@ main {
     padding: 0.8rem 4vw;
   }
 
+  .global-header { width: min(100% - 2rem, 640px); }
+  .landing-page > .global-header { padding: 1rem 4vw; }
+  .global-header .menu-toggle { display: block; }
+  .global-header .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 1rem;
+    right: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid rgba(243, 234, 214, 0.1);
+    background: rgba(7, 16, 15, 0.97);
+    box-shadow: var(--shadow-md);
+  }
+  .global-header .nav-links.nav-open { display: flex; }
+  .global-header .nav-links a { padding: 0.75rem; }
+
   .landing-hero {
     min-height: auto;
     padding: 8rem 4vw 3rem;
@@ -857,6 +985,8 @@ main {
   .landing-nav {
     padding: 0.8rem 3vw;
   }
+
+  .landing-page > .global-header { padding: 0.8rem 3vw; }
 
   .brand {
     font-size: 1rem;
@@ -1191,4 +1321,1827 @@ main {
     background: white;
     color: black;
   }
+}
+
+/* Base Layout & Reset Adjustments */
+* {
+  box-sizing: border-box;
+}
+
+.landing-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Header & Navigation Styles */
+.landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.hamburger {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: currentColor;
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.hamburger::before,
+.hamburger::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  left: 0;
+  transition: transform 0.3s ease, top 0.3s ease;
+}
+
+.hamburger::before { top: -6px; }
+.hamburger::after { top: 6px; }
+
+.hamburger.open { background: transparent; }
+.hamburger.open::before { transform: rotate(45deg); top: 0; }
+.hamburger.open::after { transform: rotate(-45deg); top: 0; }
+
+/* Grid Structures */
+.landing-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 2rem;
+  padding: 8rem 2rem 4rem;
+  min-height: 100vh;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.quality-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.landing-footer {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: 2rem;
+  padding: 4rem 2rem;
+}
+
+/* Tablet Breakpoint (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .landing-hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding-top: 6rem;
+  }
+
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .time-orb-wrap {
+    order: -1;
+    max-width: 350px;
+    margin: 0 auto;
+  }
+
+  .quality-section {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Mobile Breakpoint (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Show hamburger button and ensure clickability above overlay */
+  .menu-toggle {
+    display: block;
+    z-index: 101;
+  }
+
+  /* Top-down dropdown menu container */
+  .nav-links {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    background: rgba(15, 15, 20, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0 1.5rem;
+    gap: 1.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+          opacity 0.3s ease-in-out,
+                padding 0.3s ease;
+  }
+
+  /* Expanded menu state */
+  .nav-links.nav-open {
+    max-height: 340px;
+    opacity: 1;
+    padding: 5.5rem 1.5rem 2.25rem; /* Top padding keeps links below the logo & toggle */
+  }
+
+  /* Target link tap sizes for better usability on mobile */
+  .nav-links a {
+    width: 100%;
+    text-align: center;
+    font-size: 1.125rem;
+    padding: 0.25rem 0;
+  }
+
+  /* Section spacing overrides */
+  .landing-section {
+    padding: 3rem 1.25rem;
+  }
+
+  /* Footer single-column stacked layout */
+  .landing-footer {
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+    padding: 3rem 1.25rem;
+    text-align: center;
+  }
+
+  .landing-footer nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .landing-footer .logo-nav {
+    justify-content: center;
+  }
+}
+
+/* ========== VERSION HISTORY CARDS ========== */
+
+.version-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+.version-card-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.version-card-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.version-card-actions {
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+  text-align: right;
+}
+
+.version-card-actions p {
+  max-width: 100%;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .version-card-inner {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .version-card-content {
+    width: 100%;
+  }
+
+  .version-card-actions {
+    width: 100%;
+    flex: none;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.75rem;
+    padding-top: 0.25rem;
+    border-top: 1px solid rgba(243, 234, 214, 0.08);
+  }
+
+  .version-card-actions .animated-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .version-card {
+    padding: 1.25rem;
+  }
+
+  .version-card-inner {
+    gap: 1.25rem;
+  }
+
+  .version-card-content h3 {
+    font-size: 1.15rem;
+    line-height: 1.35;
+  }
+
+  .version-card-content p,
+  .version-card-content div {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .version-card-actions {
+    gap: 0.6rem;
+  }
+}
+
+/* =========================================================
+   STREAMCARNIA DOWNLOADER
+   Premium responsive application layout
+   ========================================================= */
+
+.downloader-page {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(36, 103, 72, 0.18),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 100% 50%,
+      rgba(215, 170, 88, 0.05),
+      transparent 35%
+    ),
+    var(--ink);
+
+  color: var(--cream);
+  position: relative;
+}
+
+.downloader-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      rgba(215, 170, 88, 0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(215, 170, 88, 0.025) 1px,
+      transparent 1px
+    );
+
+  background-size: 80px 80px;
+
+  mask-image: linear-gradient(
+    to bottom,
+    black,
+    transparent 80%
+  );
+
+  z-index: 0;
+}
+
+.downloader-shell {
+  width: min(100% - 3rem, 1320px);
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.downloader-main {
+  padding: 8rem 0 5rem;
+  width: 100%;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.downloader-hero {
+  position: relative;
+  padding: 4rem 0 5rem;
+}
+
+.downloader-hero-content {
+  max-width: 760px;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+
+.downloader-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+
+  margin-bottom: 1.5rem;
+}
+
+.downloader-eyebrow-line {
+  width: 24px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.downloader-hero h1 {
+  margin: 0;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.075em;
+  font-weight: 700;
+
+  color: var(--cream);
+}
+
+.downloader-hero h1 em {
+  font-style: normal;
+
+  background: linear-gradient(
+    135deg,
+    var(--gold),
+    #e8bb6a
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.downloader-hero-content > p {
+  max-width: 560px;
+  margin: 1.75rem auto 0;
+
+  color: rgba(243, 234, 214, 0.58);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   URL INPUT AREA
+   ========================================================= */
+
+.downloader-input-section {
+  width: min(100%, 900px);
+  margin: 0 auto;
+
+  position: relative;
+}
+
+.downloader-input-section::before {
+  content: "";
+  position: absolute;
+  inset: -1rem;
+
+  border-radius: 24px;
+
+  background: radial-gradient(
+    ellipse at center,
+    rgba(215, 170, 88, 0.07),
+    transparent 70%
+  );
+
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Prevent child components from creating horizontal overflow */
+.downloader-input-section > *,
+.downloader-component-wrapper > * {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.downloader-section {
+  position: relative;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 3rem 0;
+}
+
+.downloader-section + .downloader-section {
+  border-top: 1px solid rgba(243, 234, 214, 0.06);
+}
+
+.downloader-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.downloader-section-label {
+  display: block;
+
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+
+  margin-bottom: 0.75rem;
+}
+
+.downloader-section-heading h2 {
+  margin: 0;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+
+  color: var(--cream);
+}
+
+.downloader-section-heading h2 em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.downloader-status,
+.queue-count {
+  flex-shrink: 0;
+
+  padding: 0.5rem 0.75rem;
+
+  border: 1px solid rgba(215, 170, 88, 0.22);
+  border-radius: 999px;
+
+  color: rgba(243, 234, 214, 0.55);
+  background: rgba(215, 170, 88, 0.05);
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.downloader-status {
+  color: #9cc5a6;
+  border-color: rgba(156, 197, 166, 0.2);
+  background: rgba(156, 197, 166, 0.05);
+}
+
+/* =========================================================
+   COMPONENT CONTAINERS
+   ========================================================= */
+
+.downloader-component-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Protect cards/components from long URLs and titles */
+.downloader-component-wrapper * {
+  max-width: 100%;
+}
+
+.downloader-component-wrapper p,
+.downloader-component-wrapper h1,
+.downloader-component-wrapper h2,
+.downloader-component-wrapper h3,
+.downloader-component-wrapper h4,
+.downloader-component-wrapper span {
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   ANALYSIS
+   ========================================================= */
+
+.analysis-section {
+  padding-top: 2rem;
+}
+
+.analysis-section .downloader-component-wrapper {
+  animation: downloaderReveal 0.45s ease-out;
+}
+
+/* =========================================================
+   QUEUE
+   ========================================================= */
+
+.queue-section {
+  padding-bottom: 2rem;
+}
+
+@keyframes downloaderReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .downloader-shell {
+    width: min(100% - 2rem, 760px);
+  }
+
+  .downloader-main {
+    padding-top: 7rem;
+  }
+
+  .downloader-hero {
+    padding: 3rem 0 4rem;
+  }
+
+  .downloader-section {
+    padding: 2.5rem 0;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .downloader-shell {
+    width: min(100% - 1.5rem, 640px);
+  }
+
+  .downloader-main {
+    padding-top: 6rem;
+  }
+
+  .downloader-hero {
+    padding: 2rem 0 3rem;
+  }
+
+  .downloader-hero-content {
+    margin-bottom: 2.25rem;
+  }
+
+  .downloader-eyebrow {
+    font-size: 0.65rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .downloader-hero h1 {
+    font-size: clamp(2.4rem, 10vw, 4rem);
+    line-height: 1;
+  }
+
+  .downloader-hero-content > p {
+    font-size: 0.95rem;
+    margin-top: 1.25rem;
+  }
+
+  .downloader-section {
+    padding: 2rem 0;
+  }
+
+  .downloader-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .downloader-section-heading h2 {
+    font-size: 2rem;
+  }
+
+  .downloader-status,
+  .queue-count {
+    font-size: 0.65rem;
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .downloader-shell {
+    width: calc(100% - 1rem);
+  }
+
+  .downloader-main {
+    padding-top: 5.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .downloader-hero {
+    padding: 1.5rem 0 2.5rem;
+  }
+
+  .downloader-eyebrow {
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    gap: 0.5rem;
+  }
+
+  .downloader-eyebrow-line {
+    width: 16px;
+  }
+
+  .downloader-hero h1 {
+    font-size: clamp(2.1rem, 11vw, 3rem);
+    letter-spacing: -0.065em;
+  }
+
+  .downloader-hero-content > p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .downloader-section {
+    padding: 1.75rem 0;
+  }
+
+  .downloader-section-label {
+    font-size: 0.62rem;
+  }
+
+  .downloader-section-heading h2 {
+    font-size: 1.7rem;
+  }
+
+  .downloader-input-section::before {
+    inset: -0.5rem;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .analysis-section .downloader-component-wrapper {
+    animation: none;
+  }
+}
+
+/* =========================================================
+   STREAMCARNIA LANDING PAGE
+   Responsive refinements
+   ========================================================= */
+
+.landing-page {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Keep every major section from producing horizontal overflow */
+.landing-page main,
+.landing-page section,
+.landing-page footer {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.landing-hero {
+  width: 100%;
+  min-width: 0;
+}
+
+.hero-copy {
+  min-width: 0;
+}
+
+.hero-copy h1,
+.hero-lede {
+  overflow-wrap: anywhere;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.hero-scroll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Orb should never force the hero wider */
+.hero-orb {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-orb .animated-orb-container {
+  width: min(100%, 500px);
+}
+
+/* =========================================================
+   FEATURES
+   ========================================================= */
+
+.landing-feature-grid {
+  width: 100%;
+  min-width: 0;
+}
+
+.landing-feature-grid > * {
+  min-width: 0;
+  width: 100%;
+}
+
+/* =========================================================
+   QUALITY SECTION
+   ========================================================= */
+
+.quality-section {
+  min-width: 0;
+}
+
+.quality-copy {
+  min-width: 0;
+}
+
+.quality-copy p {
+  max-width: 560px;
+  overflow-wrap: anywhere;
+}
+
+.quality-console-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+.quality-console {
+  width: 100%;
+  min-width: 0;
+}
+
+.quality-row {
+  min-width: 0;
+}
+
+.quality-row > span {
+  min-width: 0;
+}
+
+.quality-line {
+  min-width: 0;
+}
+
+/* =========================================================
+   PLATFORM CARDS
+   ========================================================= */
+
+.platform-grid {
+  width: 100%;
+  min-width: 0;
+}
+
+.platform-grid > * {
+  min-width: 0;
+  width: 100%;
+}
+
+.platform-card h3,
+.platform-card p {
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   STEPS
+   ========================================================= */
+
+.steps-grid {
+  width: 100%;
+  min-width: 0;
+}
+
+.step-item {
+  min-width: 0;
+}
+
+.step-item h3,
+.step-item p {
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   CTA
+   ========================================================= */
+
+.landing-cta {
+  width: 100%;
+  overflow: hidden;
+}
+
+.landing-cta-inner {
+  width: min(100%, 850px);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.landing-cta h2,
+.cta-note {
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.landing-footer {
+  min-width: 0;
+}
+
+.footer-brand,
+.footer-meta {
+  min-width: 0;
+}
+
+.footer-brand p,
+.footer-meta p {
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .landing-hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 8rem 6vw 4rem;
+    gap: 3rem;
+  }
+
+  .hero-copy {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .hero-copy .eyebrow {
+    justify-content: center;
+  }
+
+  .hero-lede {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-orb {
+    order: 2;
+  }
+
+  .hero-orb .animated-orb-container {
+    width: min(65vw, 400px);
+  }
+
+  .quality-section {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .quality-copy {
+    text-align: center;
+  }
+
+  .quality-copy .eyebrow {
+    justify-content: center;
+  }
+
+  .quality-copy p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .quality-copy .text-link {
+    justify-content: center;
+  }
+
+  .quality-console-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .landing-footer {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-meta {
+    text-align: left;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .landing-hero {
+    padding: 7rem 1.5rem 3rem;
+    gap: 2.5rem;
+  }
+
+  .hero-copy {
+    width: 100%;
+  }
+
+  .landing-hero h1 {
+    font-size: clamp(2.4rem, 10vw, 3.6rem);
+    line-height: 0.98;
+  }
+
+  .hero-lede {
+    font-size: 0.95rem;
+    max-width: 520px;
+  }
+
+  .hero-actions {
+    width: 100%;
+  }
+
+  .hero-actions .animated-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-scroll {
+    margin-top: 0.75rem;
+    justify-content: center;
+  }
+
+  .hero-orb .animated-orb-container {
+    width: min(72vw, 320px);
+  }
+
+  .landing-section {
+    padding: 3.5rem 1.25rem;
+  }
+
+  .section-heading {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+
+  .feature-grid,
+  .platform-grid,
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 0;
+  }
+
+  .feature-section .modern-card {
+    padding: 1.75rem;
+  }
+
+  .quality-section {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+    gap: 2rem;
+  }
+
+  .quality-console {
+    padding: 1.5rem;
+  }
+
+  .platform-card h3 {
+    font-size: 1.45rem;
+  }
+
+  .step-item {
+    padding: 2rem 1.5rem;
+  }
+
+  .landing-cta {
+    padding: 4.5rem 1.25rem;
+  }
+
+  .landing-cta h2 {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+
+  .landing-footer {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 2rem;
+    padding: 3rem 1.25rem;
+  }
+
+  .landing-footer nav {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .landing-footer .logo-nav {
+    justify-content: center;
+  }
+
+  .footer-meta {
+    text-align: center;
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .landing-hero {
+    padding: 6rem 1rem 2.5rem;
+    gap: 2rem;
+  }
+
+  .landing-hero h1 {
+    font-size: clamp(2.05rem, 11vw, 2.8rem);
+    letter-spacing: -0.065em;
+  }
+
+  .hero-lede {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .hero-orb .animated-orb-container {
+    width: min(75vw, 280px);
+  }
+
+  .landing-section {
+    padding: 2.75rem 1rem;
+  }
+
+  .section-heading {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(1.75rem, 8vw, 2.4rem);
+  }
+
+  .feature-section .modern-card {
+    padding: 1.4rem;
+  }
+
+  .quality-console {
+    padding: 1.25rem;
+  }
+
+  .quality-row {
+    font-size: 0.85rem;
+  }
+
+  .step-item {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .step-item > span {
+    font-size: 3rem;
+  }
+
+  .landing-cta {
+    padding: 3.5rem 1rem;
+  }
+
+  .landing-cta h2 {
+    font-size: clamp(1.8rem, 8vw, 2.4rem);
+  }
+
+  .cta-note {
+    font-size: 0.9rem;
+  }
+}
+
+/* =========================================================
+   VERY NARROW DEVICES
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .landing-hero {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .landing-section {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .landing-hero h1 {
+    font-size: 2rem;
+  }
+
+  .eyebrow {
+    font-size: 0.58rem;
+  }
+
+  .animated-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-page *,
+  .landing-page *::before,
+  .landing-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   WINDOWS-INSPIRED FEATURE GRID
+   ========================================================= */
+
+.feature-tiles {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  border-top: 1px solid rgba(243, 234, 214, 0.1);
+  border-left: 1px solid rgba(243, 234, 214, 0.1);
+
+  background: rgba(13, 27, 25, 0.12);
+}
+
+.feature-tile {
+  position: relative;
+
+  min-width: 0;
+  min-height: 230px;
+
+  padding: 2.25rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  border-right: 1px solid rgba(243, 234, 214, 0.1);
+  border-bottom: 1px solid rgba(243, 234, 214, 0.1);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(13, 27, 25, 0.32),
+      rgba(20, 58, 47, 0.08)
+    );
+
+  overflow: hidden;
+
+  transition:
+    background 0.35s ease,
+    transform 0.35s ease,
+    border-color 0.35s ease;
+}
+
+/* Ambient glow */
+.feature-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(215, 170, 88, 0.13),
+      transparent 45%
+    );
+
+  opacity: 0;
+
+  transition: opacity 0.35s ease;
+
+  pointer-events: none;
+}
+
+/* Gold corner accent */
+.feature-tile::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 2px;
+
+  background: var(--gold);
+
+  opacity: 0;
+
+  transition:
+    width 0.35s ease,
+    opacity 0.35s ease;
+}
+
+.feature-tile:hover {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(20, 58, 47, 0.48),
+      rgba(13, 27, 25, 0.55)
+    );
+
+  border-color: rgba(215, 170, 88, 0.18);
+
+  transform: translateY(-3px);
+}
+
+.feature-tile:hover::before {
+  opacity: 1;
+}
+
+.feature-tile:hover::after {
+  width: 75px;
+  opacity: 1;
+}
+
+.feature-tile-number {
+  position: relative;
+  z-index: 2;
+
+  color: var(--gold);
+
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+
+  letter-spacing: 0.14em;
+}
+
+.feature-tile-content {
+  position: relative;
+  z-index: 2;
+
+  max-width: 440px;
+}
+
+.feature-tile-content h3 {
+  margin: 0 0 0.7rem;
+
+  color: var(--cream);
+
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 1.4rem;
+  line-height: 1.2;
+
+  letter-spacing: -0.04em;
+}
+
+.feature-tile-content p {
+  margin: 0;
+
+  max-width: 390px;
+
+  color: rgba(243, 234, 214, 0.55);
+
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.feature-tile-arrow {
+  position: absolute;
+
+  right: 1.75rem;
+  bottom: 1.5rem;
+
+  color: rgba(215, 170, 88, 0.4);
+
+  font-size: 1.1rem;
+
+  opacity: 0;
+
+  transform: translate(-5px, 5px);
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.feature-tile:hover .feature-tile-arrow {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+
+/* =========================================================
+   QUALITY SECTION
+   ========================================================= */
+
+.quality-console-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+.quality-console {
+  width: 100%;
+  min-width: 0;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .feature-tile {
+    min-height: 210px;
+    padding: 2rem;
+  }
+
+  .feature-tile-content h3 {
+    font-size: 1.3rem;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .feature-tiles {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-tile {
+    min-height: 185px;
+    padding: 1.6rem;
+  }
+
+  .feature-tile-content {
+    padding-right: 1.5rem;
+  }
+
+  .feature-tile-content h3 {
+    font-size: 1.2rem;
+  }
+
+  .feature-tile-content p {
+    font-size: 0.9rem;
+  }
+
+  .feature-tile-arrow {
+    right: 1.25rem;
+    bottom: 1.25rem;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .feature-tile {
+    min-height: 165px;
+    padding: 1.35rem;
+  }
+
+  .feature-tile-number {
+    font-size: 0.65rem;
+  }
+
+  .feature-tile-content h3 {
+    font-size: 1.1rem;
+  }
+
+  .feature-tile-content p {
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+}
+/* =========================================================
+   DOWNLOAD PAGE
+   Consumer-focused design
+   ========================================================= */
+
+.download-hero {
+  min-height: 760px;
+}
+
+.download-release-wrap {
+  min-width: 0;
+}
+
+.download-release-card {
+  width: min(100%, 420px);
+}
+
+.release-card-heading {
+  color: rgba(215, 170, 88, 0.8);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.release-version {
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(215, 170, 88, 0.2);
+}
+
+.release-version-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.release-version-number {
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.release-status {
+  flex-shrink: 0;
+
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  padding: 0.3rem 0.6rem;
+  border-radius: 3px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.release-status-stable {
+  color: #9cc5a6;
+  border: 1px solid rgba(156, 197, 166, 0.4);
+  background: rgba(156, 197, 166, 0.05);
+}
+
+.release-status-other {
+  color: var(--gold);
+  border: 1px solid rgba(215, 170, 88, 0.4);
+  background: rgba(215, 170, 88, 0.05);
+}
+
+.release-meta {
+  color: rgba(243, 234, 214, 0.55);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.release-loading {
+  color: rgba(243, 234, 214, 0.6);
+}
+
+
+/* =========================================================
+   DOWNLOAD FEATURES
+   ========================================================= */
+
+.download-features-section {
+  padding-top: 5rem;
+}
+
+.download-feature-tiles {
+  margin-top: 0;
+}
+
+.download-feature-icon {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+
+  font-size: 1.8rem;
+
+  opacity: 0.7;
+
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.feature-tile:hover .download-feature-icon {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.download-feature-tiles .feature-tile-content {
+  padding-right: 3rem;
+}
+
+
+/* =========================================================
+   WORKFLOW
+   ========================================================= */
+
+.download-workflow-section {
+  padding-top: 5rem;
+}
+
+.download-workflow-section .steps-grid {
+  margin-top: 1rem;
+}
+
+
+/* =========================================================
+   WINDOWS SECTION
+   ========================================================= */
+
+.download-windows-section {
+  display: flex;
+  justify-content: center;
+
+  text-align: center;
+
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+.download-windows-content {
+  width: min(100%, 680px);
+}
+
+.download-windows-content .eyebrow {
+  justify-content: center;
+}
+
+.download-windows-content h2 {
+  margin: 0;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+
+.download-windows-content h2 em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.download-windows-content > p:last-child {
+  max-width: 560px;
+  margin: 1.5rem auto 0;
+
+  color: rgba(243, 234, 214, 0.55);
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .download-hero {
+    min-height: auto;
+  }
+
+  .download-release-card {
+    width: min(100%, 500px);
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .download-hero {
+    padding-top: 7rem;
+    padding-bottom: 4rem;
+  }
+
+  .download-release-wrap {
+    width: 100%;
+  }
+
+  .download-release-card {
+    width: 100%;
+  }
+
+  .download-features-section {
+    padding-top: 3.5rem;
+  }
+
+  .download-feature-icon {
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+  }
+
+  .download-feature-tiles
+    .feature-tile-content {
+    padding-right: 2rem;
+  }
+
+  .download-workflow-section {
+    padding-top: 3.5rem;
+  }
+
+  .download-windows-section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .download-windows-content h2 {
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .download-hero {
+    padding-top: 6rem;
+  }
+
+  .download-release-card {
+    padding: 1.25rem !important;
+  }
+
+  .release-version-row {
+    align-items: flex-start;
+  }
+
+  .release-version-number {
+    font-size: 1rem;
+  }
+
+  .release-status {
+    font-size: 0.62rem;
+  }
+
+  .download-feature-icon {
+    top: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .download-feature-tiles
+    .feature-tile-content {
+    padding-right: 2.5rem;
+  }
+}
+
+@keyframes faviconShadow {
+  0%, 100% { transform: translateX(-50%) scale(0.92); opacity: 0.55; }
+  50% { transform: translateX(-50%) scale(0.72); opacity: 0.3; }
+}
+
+.consumer-feature-card {
+  min-width: 0;
+}
+
+.consumer-feature-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 1.25rem;
+
+  border: 1px solid rgba(215, 170, 88, 0.2);
+  border-radius: 10px;
+
+  background: rgba(215, 170, 88, 0.06);
+
+  color: var(--gold);
+
+  font-size: 1.25rem;
+
+  transition:
+    transform 0.3s ease,
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.consumer-feature-card:hover .consumer-feature-icon {
+  transform: translateY(-3px);
+
+  background: rgba(215, 170, 88, 0.1);
+  border-color: rgba(215, 170, 88, 0.35);
+}
+
+.consumer-feature-card h3 {
+  margin-bottom: 0.65rem;
+}
+
+.consumer-feature-card p {
+  margin: 0;
+  color: rgba(243, 234, 214, 0.58);
+  line-height: 1.65;
 }

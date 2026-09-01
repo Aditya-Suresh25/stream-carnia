@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AnimatedButton } from "../components/ModernComponents";
 import { StreamCarniaLogo } from "../components/StreamCarniaLogo";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight, faBoxOpen, faChartBar, faKey, faUserShield, faUser } from "@fortawesome/free-solid-svg-icons";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -92,12 +94,12 @@ export default function AdminLoginPage() {
 
             <motion.div className="admin-login-features" variants={containerVariants}>
               {[
-                { icon: "📦", title: "Release Management", desc: "Upload and publish new versions" },
-                { icon: "📊", title: "Analytics", desc: "Track downloads and visitors" },
-                { icon: "🔐", title: "Secure Dashboard", desc: "Token-based authentication" },
+                { icon: faBoxOpen, title: "Release Management", desc: "Upload and publish new versions" },
+                { icon: faChartBar, title: "Analytics", desc: "Track downloads and visitors" },
+                { icon: faUserShield, title: "Secure Dashboard", desc: "Token-based authentication" },
               ].map((feature, idx) => (
                 <motion.div key={idx} className="admin-login-feature" variants={itemVariants}>
-                  <span className="admin-login-feature-icon">{feature.icon}</span>
+                  <span className="admin-login-feature-icon"><FontAwesomeIcon icon={feature.icon} aria-hidden="true" /></span>
                   <div>
                     <div className="admin-login-feature-title">{feature.title}</div>
                     <div className="admin-login-feature-desc">{feature.desc}</div>
@@ -124,7 +126,7 @@ export default function AdminLoginPage() {
             {/* Username field */}
             <motion.div className="admin-login-form-group" variants={itemVariants}>
               <label htmlFor="username" className="admin-login-form-label">
-                👤 Username
+                <FontAwesomeIcon icon={faUser} aria-hidden="true" /> Username
               </label>
               <motion.div
                 className={`admin-login-form-input-wrapper ${focusedField === "username" ? "focused" : ""}`}
@@ -150,7 +152,7 @@ export default function AdminLoginPage() {
             {/* Password field */}
             <motion.div className="admin-login-form-group" variants={itemVariants}>
               <label htmlFor="password" className="admin-login-form-label">
-                🔑 Password
+                <FontAwesomeIcon icon={faKey} aria-hidden="true" /> Password
               </label>
               <motion.div
                 className={`admin-login-form-input-wrapper ${focusedField === "password" ? "focused" : ""}`}
@@ -200,7 +202,7 @@ export default function AdminLoginPage() {
                 }}
               >
                 {loading ? "Signing in..." : "Sign In"}
-                {!loading && <span aria-hidden="true">→</span>}
+                {!loading && <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />}
               </AnimatedButton>
             </motion.div>
 
