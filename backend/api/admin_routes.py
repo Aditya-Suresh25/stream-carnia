@@ -11,6 +11,7 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Header, Depends, UploadFile, File
 from fastapi.responses import StreamingResponse
+from appwrite.exception import AppwriteException
 from pydantic import BaseModel
 
 from backend.app_settings import settings_store
@@ -20,6 +21,15 @@ from backend.services.appwrite_service import appwrite_service
 logger = logging.getLogger("api.admin")
 
 router = APIRouter(prefix="/admin")
+
+
+def _appwrite_unavailable(exc: AppwriteException) -> HTTPException:
+    logger.error("Appwrite request failed: %s", exc)
+    return HTTPException(
+        status_code=503,
+        detail="Appwrite is not configured with the required API-key permissions. "
+        "Enable documents.read/documents.write and files.read/files.write, then redeploy.",
+    )
 
 # Initialize analytics store
 analytics_store = AnalyticsStore(
@@ -265,7 +275,10 @@ def logout(user: dict = Depends(_require_admin)):
 def get_all_versions() -> list[VersionResponse]:
     """Get all versions (public endpoint)."""
     if appwrite_service.enabled:
-        return [VersionResponse(**version) for version in appwrite_service.list_versions()]
+        try:
+            return [VersionResponse(**version) for version in appwrite_service.list_versions()]
+        except AppwriteException as exc:
+            raise _appwrite_unavailable(exc) from exc
 
     versions = analytics_store.get_all_versions_with_files()
     return [
@@ -291,7 +304,10 @@ def get_all_versions() -> list[VersionResponse]:
 def get_latest_version() -> VersionResponse | None:
     """Get the latest published/latest version for public download pages."""
     if appwrite_service.enabled:
-        versions = appwrite_service.list_versions()
+        try:
+            versions = appwrite_service.list_versions()
+        except AppwriteException as exc:
+            raise _appwrite_unavailable(exc) from exc
         if not versions:
             raise HTTPException(status_code=404, detail="No versions found")
         selected = next((item for item in versions if item["is_latest"] or item["is_published"]), versions[0])

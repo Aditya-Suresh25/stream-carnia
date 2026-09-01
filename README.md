@@ -165,8 +165,11 @@ ZIP storage when all `APPWRITE_*` variables are configured. In Appwrite:
   `changelog` (string), `is_latest` (boolean), `is_published` (boolean),
   `download_count` (integer), `file_id` (string), `file_name` (string), and
   `uploaded_at` (string).
-3. Create a private storage bucket for ZIP files. Give the server API key
-  database and storage permissions; do not expose that key to Vercel.
+3. Create a private storage bucket for ZIP files. Create a server API key with
+  these scopes: `databases.read`, `databases.write`, `documents.read`,
+  `documents.write`, `files.read`, and `files.write`. The missing
+  `documents.read` scope produces a 401 from Appwrite. Do not expose this key
+  to Vercel.
 4. Add the Appwrite endpoint, project, API key, database, collection, and
   bucket IDs to Render using the names in `backend/.env.example`.
 5. Redeploy Render, then log in at `/admin/login` using the Appwrite account
