@@ -5,6 +5,7 @@ import { ModernCard, AnimatedButton } from "../components/ModernComponents";
 import { StreamCarniaLogo } from "../components/StreamCarniaLogo";
 import { AnimatedOrb } from "../components/AnimatedOrb";
 import Header from "../components/Header";
+import { api } from "../services/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowDown, faCalendarDays, faDownload, faGears, faHardDrive } from "@fortawesome/free-solid-svg-icons";
 
@@ -17,14 +18,7 @@ export default function VersionHistoryPage() {
     // Fetch all versions
     const fetchVersions = async () => {
       try {
-        const res = await fetch("/api/admin/versions");
-
-        if (res.ok) {
-          const data = await res.json();
-          setVersions(data);
-        } else {
-          setError("Could not fetch versions");
-        }
+        setVersions(await api.getVersions());
       } catch (err) {
         setError(err.message);
       } finally {
@@ -35,32 +29,24 @@ export default function VersionHistoryPage() {
     fetchVersions();
 
     // Track page visit
-    fetch("/api/admin/track/page-visit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        page: "versions",
-        referrer: document.referrer,
-        user_agent: navigator.userAgent,
-      }),
+    api.trackPageVisit({
+      page: "versions",
+      referrer: document.referrer,
+      user_agent: navigator.userAgent,
     }).catch(() => {});
   }, []);
 
   const handleVersionDownload = (version) => {
     // Track download
-    fetch("/api/admin/track/download", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        version: version.version,
-        source: "version-history",
-        user_agent: navigator.userAgent,
-        referrer: document.referrer,
-      }),
+    api.trackDownload({
+      version: version.version,
+      source: "version-history",
+      user_agent: navigator.userAgent,
+      referrer: document.referrer,
     }).catch(() => {});
 
     const target = version.file_name
-      ? `/api/admin/releases/${version.version}/download`
+      ? api.releaseDownloadUrl(version.version)
       : version.download_url;
 
     if (target) {

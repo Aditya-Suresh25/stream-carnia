@@ -8,6 +8,7 @@ import {
 } from "../components/ModernComponents";
 import { StreamCarniaLogo } from "../components/StreamCarniaLogo";
 import Header from "../components/Header";
+import { api } from "../services/api";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowDown, faArrowRight, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
@@ -71,16 +72,10 @@ const steps = [
 
 export default function LandingPage() {
   useEffect(() => {
-    fetch("/api/admin/track/page-visit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    api.trackPageVisit({
         page: "home",
         referrer: document.referrer,
         user_agent: navigator.userAgent,
-      }),
     }).catch(() => {});
 
     const revealElements = [

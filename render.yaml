@@ -11,3 +11,15 @@ services:
         sync: false
       - key: STAGING_DIR
         value: /tmp/StreamCarnia
+      - key: APPWRITE_ENDPOINT
+        value: https://cloud.appwrite.io/v1
+      - key: APPWRITE_PROJECT_ID
+        sync: false
+      - key: APPWRITE_API_KEY
+        sync: false
+      - key: APPWRITE_DATABASE_ID
+        sync: false
+      - key: APPWRITE_RELEASES_COLLECTION_ID
+        sync: false
+      - key: APPWRITE_BUCKET_ID
+        sync: false

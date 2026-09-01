@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ModernCard, AnimatedButton } from "../components/ModernComponents";
 import { StreamCarniaLogo } from "../components/StreamCarniaLogo";
 import Header from "../components/Header";
+import { api } from "../services/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowDown,
@@ -23,22 +24,18 @@ export default function DownloadPage() {
   const [error, setError] = useState(null);
 
   const downloadUrl =
-    latest?.download_url ||
-    import.meta.env.VITE_DOWNLOAD_URL ||
-    "/api/admin/releases/latest/download";
+    latest?.download_url && !latest.download_url.startsWith("/")
+      ? latest.download_url
+      : latest
+        ? api.releaseDownloadUrl(latest.version)
+        : null;
+  const fallbackDownloadUrl = import.meta.env.VITE_DOWNLOAD_URL || null;
 
   useEffect(() => {
     // Fetch latest version from API
     const fetchLatest = async () => {
       try {
-        const res = await fetch("/api/admin/versions/latest");
-
-        if (res.ok) {
-          const data = await res.json();
-          setLatest(data);
-        } else {
-          setError("Could not fetch latest version");
-        }
+        setLatest(await api.getLatestVersion());
       } catch (err) {
         setError(err.message);
       } finally {
@@ -49,38 +46,28 @@ export default function DownloadPage() {
     fetchLatest();
 
     // Track page visit
-    fetch("/api/admin/track/page-visit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        page: "download",
-        referrer: document.referrer,
-        user_agent: navigator.userAgent,
-      }),
+    api.trackPageVisit({
+      page: "download",
+      referrer: document.referrer,
+      user_agent: navigator.userAgent,
     }).catch(() => {});
   }, []);
 
   const handleDownload = () => {
-    if (!latest && !import.meta.env.VITE_DOWNLOAD_URL) {
+    if (!latest && !fallbackDownloadUrl) {
       setError("No download is currently available");
       return;
     }
 
     // Track download
-    fetch("/api/admin/track/download", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        version: latest?.version,
-        source: "download-page",
-        user_agent: navigator.userAgent,
-        referrer: document.referrer,
-      }),
+    api.trackDownload({
+      version: latest?.version,
+      source: "download-page",
+      user_agent: navigator.userAgent,
+      referrer: document.referrer,
     }).catch(() => {});
 
-    const targetUrl = latest
-      ? `/api/admin/releases/${latest.version}/download`
-      : downloadUrl;
+    const targetUrl = latest ? downloadUrl : fallbackDownloadUrl;
 
     window.location.href = targetUrl;
   };

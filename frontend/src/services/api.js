@@ -2,11 +2,15 @@ const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 const WS_ORIGIN = (import.meta.env.VITE_WS_URL || "").replace(/\/$/, "");
 const BASE = `${API_ORIGIN}/api`;
 
+export function apiUrl(path) {
+  return `${BASE}${path}`;
+}
+
 async function request(path, options = {}) {
   const headers = options.body
     ? { "Content-Type": "application/json", ...options.headers }
     : options.headers;
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(apiUrl(path), {
     ...options,
     ...(headers ? { headers } : {}),
   });
@@ -26,6 +30,11 @@ async function request(path, options = {}) {
 
 export const api = {
   health: () => request("/health"),
+  getLatestVersion: () => request("/admin/versions/latest"),
+  getVersions: () => request("/admin/versions"),
+  trackPageVisit: (payload) => request("/admin/track/page-visit", { method: "POST", body: JSON.stringify(payload) }),
+  trackDownload: (payload) => request("/admin/track/download", { method: "POST", body: JSON.stringify(payload) }),
+  releaseDownloadUrl: (version) => `${BASE}/admin/releases/${encodeURIComponent(version)}/download`,
   analyze: (url) => request("/analyze", { method: "POST", body: JSON.stringify({ url }) }),
   startDownload: (payload) => request("/download", { method: "POST", body: JSON.stringify(payload) }),
   listDownloads: () => request("/download"),

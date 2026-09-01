@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import io
 import os
 import shutil
 from datetime import datetime, timedelta
@@ -9,10 +10,12 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Header, Depends, UploadFile, File
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from backend.app_settings import settings_store
 from backend.services.analytics_store import AnalyticsStore
+from backend.services.appwrite_service import appwrite_service
 
 logger = logging.getLogger("api.admin")
 
@@ -137,6 +140,13 @@ def _require_admin(authorization: Optional[str] = Header(None)) -> dict:
         raise HTTPException(status_code=401, detail="Missing or invalid token")
     
     token = authorization.replace("Bearer ", "")
+
+    if appwrite_service.enabled:
+        user = appwrite_service.verify_session(token)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid or expired Appwrite session")
+        return user
+
     user = _verify_token(token)
     
     if not user:
@@ -180,6 +190,17 @@ def track_download(event: DownloadEventRequest):
 @router.get("/releases/{version}/download")
 def download_release(version: str):
     """Download a specific release version (public endpoint)."""
+    if appwrite_service.enabled:
+        result = appwrite_service.get_download(version)
+        if not result:
+            raise HTTPException(status_code=404, detail="Published release not found")
+        content, filename = result
+        return StreamingResponse(
+            io.BytesIO(content),
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
     from fastapi.responses import FileResponse
     
     file_info = analytics_store.get_release_file_info(version)
@@ -209,6 +230,14 @@ def download_release(version: str):
 @router.post("/login")
 def login(request: LoginRequest) -> LoginResponse:
     """Admin login endpoint."""
+    if appwrite_service.enabled:
+        try:
+            session = appwrite_service.authenticate(request.username, request.password)
+        except Exception as exc:
+            logger.warning("Appwrite login failed: %s", exc)
+            raise HTTPException(status_code=401, detail="Invalid credentials") from exc
+        return LoginResponse(success=True, token=session["token"], message="Login successful")
+
     if analytics_store.verify_admin_user(request.username, request.password):
         token = _generate_token(request.username)
         return LoginResponse(
@@ -235,6 +264,9 @@ def logout(user: dict = Depends(_require_admin)):
 @router.get("/versions")
 def get_all_versions() -> list[VersionResponse]:
     """Get all versions (public endpoint)."""
+    if appwrite_service.enabled:
+        return [VersionResponse(**version) for version in appwrite_service.list_versions()]
+
     versions = analytics_store.get_all_versions_with_files()
     return [
         VersionResponse(
@@ -258,6 +290,13 @@ def get_all_versions() -> list[VersionResponse]:
 @router.get("/versions/latest")
 def get_latest_version() -> VersionResponse | None:
     """Get the latest published/latest version for public download pages."""
+    if appwrite_service.enabled:
+        versions = appwrite_service.list_versions()
+        if not versions:
+            raise HTTPException(status_code=404, detail="No versions found")
+        selected = next((item for item in versions if item["is_latest"] or item["is_published"]), versions[0])
+        return VersionResponse(**selected)
+
     versions = analytics_store.get_all_versions_with_files()
     if not versions:
         raise HTTPException(status_code=404, detail="No versions found")
@@ -297,6 +336,12 @@ def create_version(
     user: dict = Depends(_require_admin),
 ) -> VersionResponse:
     """Create a new version (admin only)."""
+    if appwrite_service.enabled:
+        try:
+            return VersionResponse(**appwrite_service.create_version(version_data.model_dump()))
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     success = analytics_store.create_version(
         version=version_data.version,
         release_date=version_data.release_date,
@@ -333,6 +378,12 @@ def update_version(
     user: dict = Depends(_require_admin),
 ) -> VersionResponse:
     """Update a version (admin only)."""
+    if appwrite_service.enabled:
+        updated = appwrite_service.update_version(version, version_data.model_dump())
+        if not updated:
+            raise HTTPException(status_code=404, detail="Version not found")
+        return VersionResponse(**updated)
+
     success = analytics_store.update_version(
         version=version,
         release_date=version_data.release_date,
@@ -373,6 +424,16 @@ async def upload_release_file(
     user: dict = Depends(_require_admin),
 ) -> FileUploadResponse:
     """Upload a release ZIP file (admin only)."""
+    if appwrite_service.enabled:
+        try:
+            result = appwrite_service.upload_release(version, file.filename or "release.zip", await file.read())
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except Exception as exc:
+            logger.exception("Failed to upload release to Appwrite")
+            raise HTTPException(status_code=500, detail="Failed to upload file to Appwrite") from exc
+        return FileUploadResponse(success=True, message="File uploaded successfully", **result)
+
     # Validate file type
     if not file.filename.endswith(".zip"):
         raise HTTPException(status_code=400, detail="Only .zip files are allowed")
@@ -423,6 +484,11 @@ def publish_release(
     user: dict = Depends(_require_admin),
 ) -> dict:
     """Publish a release (make it available for download) (admin only)."""
+    if appwrite_service.enabled:
+        if not appwrite_service.publish(version, True):
+            raise HTTPException(status_code=404, detail="Version not found")
+        return {"success": True, "message": f"Version {version} published successfully"}
+
     # Check if version exists
     versions = analytics_store.get_all_versions()
     if not any(v["version"] == version for v in versions):
@@ -445,6 +511,11 @@ def unpublish_release(
     user: dict = Depends(_require_admin),
 ) -> dict:
     """Unpublish a release (admin only)."""
+    if appwrite_service.enabled:
+        if not appwrite_service.publish(version, False):
+            raise HTTPException(status_code=404, detail="Version not found")
+        return {"success": True, "message": f"Version {version} unpublished successfully"}
+
     success = analytics_store.unpublish_release(version)
     
     if not success:
@@ -462,6 +533,11 @@ def delete_release(
     user: dict = Depends(_require_admin),
 ) -> dict:
     """Delete a release and its associated files (admin only)."""
+    if appwrite_service.enabled:
+        if not appwrite_service.delete_version(version):
+            raise HTTPException(status_code=404, detail="Version not found")
+        return {"success": True, "message": f"Version {version} deleted successfully"}
+
     # Get file info before deletion
     file_info = analytics_store.get_release_file_info(version)
     

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxOpen, faCalendarDays, faChartBar, faDownload, faHardDrive, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { apiUrl } from "../services/api";
 
 function formatFileSize(bytes) {
   if (!bytes) return "—";
@@ -50,8 +51,8 @@ export default function AdminDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [analyticsRes, versionsRes] = await Promise.all([
-        fetch("/api/admin/analytics/summary", { headers }),
-        fetch("/api/admin/versions", { headers }),
+        fetch(apiUrl("/admin/analytics/summary"), { headers }),
+        fetch(apiUrl("/admin/versions"), { headers }),
       ]);
 
       if (analyticsRes.status === 401 || versionsRes.status === 401) {
@@ -103,7 +104,7 @@ export default function AdminDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
       
-      const res = await fetch("/api/admin/versions", {
+      const res = await fetch(apiUrl("/admin/versions"), {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -128,7 +129,7 @@ export default function AdminDashboard() {
         const formData = new FormData();
         formData.append("file", uploadedFile);
 
-        const uploadRes = await fetch(`/api/admin/releases/upload/${newRelease.version}`, {
+        const uploadRes = await fetch(apiUrl(`/admin/releases/upload/${encodeURIComponent(newRelease.version)}`), {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: formData,
@@ -143,7 +144,7 @@ export default function AdminDashboard() {
           throw new Error("Failed to upload file");
         }
 
-        const publishRes = await fetch(`/api/admin/releases/publish/${newRelease.version}`, {
+        const publishRes = await fetch(apiUrl(`/admin/releases/publish/${encodeURIComponent(newRelease.version)}`), {
           method: "POST",
           headers,
         });
@@ -185,7 +186,7 @@ export default function AdminDashboard() {
 
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const res = await fetch(`/api/admin/releases/${version}`, {
+      const res = await fetch(apiUrl(`/admin/releases/${encodeURIComponent(version)}`), {
         method: "DELETE",
         headers,
       });

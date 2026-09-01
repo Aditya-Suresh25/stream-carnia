@@ -153,6 +153,29 @@ PATH in the container. Render's filesystem is ephemeral, so completed files
 are staged under `/tmp/StreamCarnia` and retained only temporarily. Stale job
 directories older than 24 hours are removed on startup.
 
+### Appwrite setup
+
+Appwrite is used for persistent admin authentication, release metadata, and
+ZIP storage when all `APPWRITE_*` variables are configured. In Appwrite:
+
+1. Create a project and an admin user with an email/password account.
+2. Create a database and a `releases` collection. Add these attributes:
+  `version` (required string), `release_date` (required string), `status`
+  (required string), `download_url` (string), `file_size` (integer),
+  `changelog` (string), `is_latest` (boolean), `is_published` (boolean),
+  `download_count` (integer), `file_id` (string), `file_name` (string), and
+  `uploaded_at` (string).
+3. Create a private storage bucket for ZIP files. Give the server API key
+  database and storage permissions; do not expose that key to Vercel.
+4. Add the Appwrite endpoint, project, API key, database, collection, and
+  bucket IDs to Render using the names in `backend/.env.example`.
+5. Redeploy Render, then log in at `/admin/login` using the Appwrite account
+  email and password. Create a release, upload its ZIP, and publish it.
+
+When Appwrite variables are absent, local development falls back to the
+existing SQLite/local-file implementation. This fallback is useful locally;
+configure Appwrite in Render for persistent production releases.
+
 ### Vercel + Render checklist
 
 1. Create a Render Web Service from this repository using the included
@@ -169,9 +192,9 @@ directories older than 24 hours are removed on startup.
 ## Release download flow
 
 The public download page retrieves the latest release metadata from the API and
-streams the published installer through the release endpoint. Release files
-are staged on Render's ephemeral filesystem, so durable hosting such as GitHub
-Releases or object storage is recommended for production distribution.
+streams the published installer through the release endpoint. With Appwrite
+configured, release metadata is stored in the Appwrite database and ZIP files
+are stored in the Appwrite bucket, so they survive Render restarts.
 
 ## Known hosting limitations
 

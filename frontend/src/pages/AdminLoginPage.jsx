@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AnimatedButton } from "../components/ModernComponents";
 import { StreamCarniaLogo } from "../components/StreamCarniaLogo";
+import { apiUrl } from "../services/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faBoxOpen, faChartBar, faKey, faUserShield, faUser } from "@fortawesome/free-solid-svg-icons";
 
@@ -28,7 +29,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await fetch(apiUrl("/admin/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -123,10 +124,10 @@ export default function AdminLoginPage() {
               <p>Sign in to your StreamCarnia admin account</p>
             </motion.div>
 
-            {/* Username field */}
+            {/* Appwrite account email field */}
             <motion.div className="admin-login-form-group" variants={itemVariants}>
               <label htmlFor="username" className="admin-login-form-label">
-                <FontAwesomeIcon icon={faUser} aria-hidden="true" /> Username
+                <FontAwesomeIcon icon={faUser} aria-hidden="true" /> Email
               </label>
               <motion.div
                 className={`admin-login-form-input-wrapper ${focusedField === "username" ? "focused" : ""}`}
@@ -135,16 +136,16 @@ export default function AdminLoginPage() {
               >
                 <input
                   id="username"
-                  type="text"
+                  type="email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   onFocus={() => setFocusedField("username")}
                   onBlur={() => setFocusedField(null)}
                   className="admin-login-form-input"
-                  placeholder="Enter your username"
+                  placeholder="Enter your admin email"
                   disabled={loading}
                   required
-                  autoComplete="username"
+                  autoComplete="email"
                 />
               </motion.div>
             </motion.div>
