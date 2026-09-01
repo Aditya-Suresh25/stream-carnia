@@ -60,8 +60,20 @@ export default function AdminDashboard() {
         return;
       }
 
-      if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
-      if (versionsRes.ok) setVersions(await versionsRes.json());
+      if (!analyticsRes.ok || !versionsRes.ok) {
+        const failedResponse = !analyticsRes.ok ? analyticsRes : versionsRes;
+        let detail = "Could not load the admin dashboard.";
+        try {
+          const body = await failedResponse.json();
+          detail = body.detail || detail;
+        } catch {
+          // Keep the dashboard error readable when the API returns no JSON.
+        }
+        throw new Error(detail);
+      }
+
+      setAnalytics(await analyticsRes.json());
+      setVersions(await versionsRes.json());
       setLoading(false);
     } catch (err) {
       setError(err.message);

@@ -37,8 +37,11 @@ export default function AdminLoginPage() {
 
       if (res.ok) {
         const data = await res.json();
+        if (!data.token) {
+          throw new Error("Login succeeded but no Appwrite session token was returned.");
+        }
         localStorage.setItem("admin_token", data.token);
-        navigate("/admin");
+        window.location.assign("/admin");
       } else {
         const data = await res.json();
         setError(data.detail || "Login failed. Please check your credentials.");
