@@ -1,9 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import LandingPage from "../pages/LandingPage";
-import Home from "../pages/Home";
-import HistoryPage from "../pages/HistoryPage";
-import SettingsPage from "../pages/SettingsPage";
+import DownloadPage from "../pages/DownloadPage";
+import VersionHistoryPage from "../pages/VersionHistoryPage";
+import AdminLoginPage from "../pages/AdminLoginPage";
+import AdminDashboard from "../pages/AdminDashboard";
 import NotFoundPage from "../pages/NotFoundPage";
 
 export default function AppRoutes() {
@@ -12,9 +13,10 @@ export default function AppRoutes() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/download" element={<Home />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/download" element={<DownloadPage />} />
+        <Route path="/versions" element={<VersionHistoryPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>

@@ -10,6 +10,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routes import router, websocket_download_progress, download_manager
+from backend.api.admin_routes import router as admin_router
 from backend.app_settings import settings_store
 from backend.services.ffmpeg_service import get_ffmpeg_status
 from backend.utils.system import cleanup_staging
@@ -38,6 +39,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+app.include_router(admin_router, prefix="/api")
 
 
 @app.on_event("startup")
